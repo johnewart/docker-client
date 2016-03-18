@@ -913,8 +913,15 @@ public class DefaultDockerClient implements DockerClient, Closeable {
     push(image, new LoggingPushHandler(image));
   }
 
+
   @Override
   public void push(final String image, final ProgressHandler handler)
+      throws DockerException, InterruptedException {
+    this.push(image, handler, null);
+  }
+
+  @Override
+  public void push(final String image, final ProgressHandler handler, final AuthConfig authConfig)
       throws DockerException, InterruptedException {
     final ImageRef imageRef = new ImageRef(image);
 
@@ -924,12 +931,13 @@ public class DefaultDockerClient implements DockerClient, Closeable {
       resource = resource.queryParam("tag", imageRef.getTag());
     }
 
+
     // the docker daemon requires that the X-Registry-Auth header is specified
     // with a non-empty string even if your registry doesn't use authentication
     try (ProgressStream push =
              request(POST, ProgressStream.class, resource,
                      resource.request(APPLICATION_JSON_TYPE)
-                         .header("X-Registry-Auth", authHeader()))) {
+                         .header("X-Registry-Auth", authHeader(authConfig)))) {
       push.tail(handler, POST, resource.getUri());
     } catch (IOException e) {
       throw new DockerException(e);
@@ -999,6 +1007,14 @@ public class DefaultDockerClient implements DockerClient, Closeable {
   @Override
   public String build(final Path directory, final String name, final String dockerfile,
                       final ProgressHandler handler, final BuildParam... params)
+      throws DockerException, InterruptedException, IOException {
+    return build(directory, name, dockerfile, handler, this.authConfig, params);
+  }
+
+  @Override
+  public String build(final Path directory, final String name, final String dockerfile,
+                      final ProgressHandler handler, final AuthConfig authConfig,
+                      final BuildParam... params)
       throws DockerException, InterruptedException, IOException {
     checkNotNull(handler, "handler");
 

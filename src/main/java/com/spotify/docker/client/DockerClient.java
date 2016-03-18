@@ -140,6 +140,11 @@ public interface DockerClient extends Closeable {
                                     final String author)
       throws DockerException, InterruptedException;
 
+  String build(Path directory, String name, String dockerfile,
+               ProgressHandler handler, AuthConfig authConfig,
+               BuildParam... params)
+      throws DockerException, InterruptedException, IOException;
+
   /**
    * Inspect a docker container image.
    *
@@ -329,6 +334,9 @@ public interface DockerClient extends Closeable {
    * @throws InterruptedException If the thread is interrupted
    */
   void push(String image, ProgressHandler handler) throws DockerException, InterruptedException;
+
+  void push(String image, ProgressHandler handler, AuthConfig authConfig)
+      throws DockerException, InterruptedException;
 
   /**
    * Tag a docker image.
