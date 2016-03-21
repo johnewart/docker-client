@@ -1504,10 +1504,6 @@ public class DefaultDockerClient implements DockerClient, Closeable {
     }
   }
 
-  private String authHeader() throws DockerException {
-    return authHeader(authConfig);
-  }
-
   private String authHeader(final AuthConfig authConfig) throws DockerException {
     if (authConfig == null) {
       return "null";
